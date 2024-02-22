@@ -1,0 +1,166 @@
+Write all yaml file with below image name
+image name naveen20/spring-boot-app:latest
+EXPOSE 8080 with nodeport 
+daplyment yaml use node affinity  and cpu limit and request
+memory linit and request
+pod yaml
+PV yaml
+PVC yaml
+service yaml
+HPA yaml
+ingress yaml
+
+
+
+==================deployment=====================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: mynamespace
+  name: spring-boot-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-boot-app
+  template:
+    metadata:
+      labels:
+        app: spring-boot-app
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: <node_label_key>
+                operator: In
+                values:
+                - <node_label_value>
+      containers:
+      - name: spring-boot-app
+        image: naveen20/spring-boot-app:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+
+
+======================pod yaml===============
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: mynamespace
+  name: spring-boot-app-pod
+  labels:
+    app: spring-boot-app
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: <node_label_key>
+            operator: In
+            values:
+            - <node_label_value>
+  containers:
+  - name: spring-boot-app
+    image: naveen20/spring-boot-app:latest
+    ports:
+    - containerPort: 8080
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+      requests:
+        cpu: "200m"
+        memory: "256Mi"
+
+
+===============pv =================
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /path/to/host/dir
+
+
+===================pvc=================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: mynamespace
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+=======================servcie=====================
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: mynamespace
+  name: spring-boot-app-service
+spec:
+  selector:
+    app: spring-boot-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: NodePort
+
+
+==========================HPA================
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  namespace: mynamespace
+  name: spring-boot-app-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: spring-boot-app-deployment
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 50
+
+
+==============================ingress===============
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: mynamespace
+  name: spring-boot-app-ingress
+spec:
+  rules:
+  - host: yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: spring-boot-app-service
+            port:
+              number: 8080
