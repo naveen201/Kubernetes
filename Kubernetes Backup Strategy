@@ -1,0 +1,5 @@
+Complete Kubernetes Backup Strategy
+✅ Code & Deployment: Keep in Git (CI/CD pipelines, Helm charts).
+✅ Secrets: Store in Secrets Manager or Vault.
+✅ Persistent Data: Backup databases and volumes with Velero.
+✅ Cluster Configs: Backup ArgoCD, Ingress, and CRDs.(manual YAML backups)
