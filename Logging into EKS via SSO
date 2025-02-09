@@ -1,0 +1,6 @@
+Steps for Logging into EKS via SSO
+✅ 1. Enable AWS SSO (IAM Identity Center) and create users/groups.
+✅ 2. Create an IAM Role for EKS access and attach necessary policies.
+✅ 3. Configure Kubernetes RBAC (Role & RoleBinding) for SSO users.
+✅ 4. Edit aws-auth ConfigMap in EKS to map the IAM Role.
+✅ 5. Login using AWS SSO CLI:
